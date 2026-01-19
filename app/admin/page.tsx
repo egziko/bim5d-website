@@ -1,112 +1,115 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import TiptapEditor from '@/components/TiptapEditor'
-import Link from 'next/link'
+import { useState, useEffect } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import TiptapEditor from "@/components/TiptapEditor";
+import Link from "next/link";
 
 interface Page {
-  id: string
-  slug: string
-  title: string
-  content: string
-  created_at: string
-  updated_at: string
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function AdminDashboard() {
-  const [pages, setPages] = useState<Page[]>([])
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null)
-  const [isCreating, setIsCreating] = useState(false)
+  const [pages, setPages] = useState<Page[]>([]);
+  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({
-    slug: '',
-    title: '',
-    content: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
+    slug: "",
+    title: "",
+    content: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchPages()
-  }, [])
+    fetchPages();
+  }, []);
 
   const fetchPages = async () => {
     try {
-      const res = await fetch('/api/pages')
-      const data = await res.json()
-      setPages(data)
+      const res = await fetch("/api/pages");
+      const data = await res.json();
+      setPages(data);
     } catch (err) {
-      setMessage('Error loading pages')
+      setMessage("Error loading pages");
     }
-  }
+  };
 
   const handleSave = async () => {
     if (!formData.slug || !formData.title || !formData.content) {
-      setMessage('All fields are required')
-      return
+      setMessage("All fields are required");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       if (selectedPage) {
         // Update existing page
-        const res = await fetch(`/api/pages/${selectedPage.slug}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: formData.title, content: formData.content }),
-        })
-        const data = await res.json()
-        setMessage('Page updated successfully')
-        fetchPages()
-        setSelectedPage(null)
+        await fetch(`/api/pages/${selectedPage.slug}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: formData.title,
+            content: formData.content,
+          }),
+        });
+
+        setMessage("Page updated successfully");
+        fetchPages();
+        setSelectedPage(null);
       } else {
         // Create new page
-        const res = await fetch('/api/pages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("/api/pages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
-        })
-        const data = await res.json()
-        setMessage('Page created successfully')
-        fetchPages()
+        });
+
+        setMessage("Page created successfully");
+        fetchPages();
       }
-      setFormData({ slug: '', title: '', content: '' })
-      setIsCreating(false)
+      setFormData({ slug: "", title: "", content: "" });
+      setIsCreating(false);
     } catch (err) {
-      setMessage('Error saving page')
+      setMessage("Error saving page");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleEdit = (page: Page) => {
-    setSelectedPage(page)
-    setFormData({ slug: page.slug, title: page.title, content: page.content })
-    setIsCreating(false)
-  }
+    setSelectedPage(page);
+    setFormData({ slug: page.slug, title: page.title, content: page.content });
+    setIsCreating(false);
+  };
 
   const handleDelete = async (slug: string) => {
-    if (!confirm('Delete this page?')) return
+    if (!confirm("Delete this page?")) return;
 
     try {
-      await fetch(`/api/pages/${slug}`, { method: 'DELETE' })
-      setMessage('Page deleted')
-      fetchPages()
+      await fetch(`/api/pages/${slug}`, { method: "DELETE" });
+      setMessage("Page deleted");
+      fetchPages();
       if (selectedPage?.slug === slug) {
-        setSelectedPage(null)
-        setFormData({ slug: '', title: '', content: '' })
+        setSelectedPage(null);
+        setFormData({ slug: "", title: "", content: "" });
       }
     } catch (err) {
-      setMessage('Error deleting page')
+      setMessage("Error deleting page");
     }
-  }
+  };
 
   const handleCancel = () => {
-    setSelectedPage(null)
-    setFormData({ slug: '', title: '', content: '' })
-    setIsCreating(false)
-  }
+    setSelectedPage(null);
+    setFormData({ slug: "", title: "", content: "" });
+    setIsCreating(false);
+  };
 
   return (
     <>
@@ -126,9 +129,9 @@ export default function AdminDashboard() {
             <div className="lg:col-span-1">
               <button
                 onClick={() => {
-                  setIsCreating(true)
-                  setSelectedPage(null)
-                  setFormData({ slug: '', title: '', content: '' })
+                  setIsCreating(true);
+                  setSelectedPage(null);
+                  setFormData({ slug: "", title: "", content: "" });
                 }}
                 className="w-full mb-4 px-4 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
               >
@@ -136,14 +139,18 @@ export default function AdminDashboard() {
               </button>
 
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <h2 className="p-4 font-semibold text-lg border-b border-gray-200">Pages</h2>
+                <h2 className="p-4 font-semibold text-lg border-b border-gray-200">
+                  Pages
+                </h2>
                 <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
                   {pages.map((page) => (
                     <button
                       key={page.id}
                       onClick={() => handleEdit(page)}
                       className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                        selectedPage?.id === page.id ? 'bg-primary-50 border-l-4 border-primary-600' : ''
+                        selectedPage?.id === page.id
+                          ? "bg-primary-50 border-l-4 border-primary-600"
+                          : ""
                       }`}
                     >
                       <p className="font-semibold text-sm">{page.title}</p>
@@ -159,16 +166,20 @@ export default function AdminDashboard() {
               {isCreating || selectedPage ? (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold mb-6">
-                    {selectedPage ? 'Edit Page' : 'Create New Page'}
+                    {selectedPage ? "Edit Page" : "Create New Page"}
                   </h2>
 
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-semibold mb-2">Slug (URL)</label>
+                      <label className="block text-sm font-semibold mb-2">
+                        Slug (URL)
+                      </label>
                       <input
                         type="text"
                         value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, slug: e.target.value })
+                        }
                         disabled={!!selectedPage}
                         placeholder="e.g., home-hero"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-600 disabled:bg-gray-100"
@@ -176,21 +187,29 @@ export default function AdminDashboard() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2">Title</label>
+                      <label className="block text-sm font-semibold mb-2">
+                        Title
+                      </label>
                       <input
                         type="text"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                         placeholder="Page title"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-600"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold mb-2">Content</label>
+                      <label className="block text-sm font-semibold mb-2">
+                        Content
+                      </label>
                       <TiptapEditor
                         content={formData.content}
-                        onChange={(content) => setFormData({ ...formData, content })}
+                        onChange={(content) =>
+                          setFormData({ ...formData, content })
+                        }
                       />
                     </div>
 
@@ -200,7 +219,7 @@ export default function AdminDashboard() {
                         disabled={loading}
                         className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
                       >
-                        {loading ? 'Saving...' : 'Save Page'}
+                        {loading ? "Saving..." : "Save Page"}
                       </button>
                       {selectedPage && (
                         <button
@@ -221,8 +240,13 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                  <p className="text-gray-600 mb-4">Select a page to edit or create a new one</p>
-                  <Link href="/" className="text-primary-600 hover:text-primary-700 font-semibold">
+                  <p className="text-gray-600 mb-4">
+                    Select a page to edit or create a new one
+                  </p>
+                  <Link
+                    href="/"
+                    className="text-primary-600 hover:text-primary-700 font-semibold"
+                  >
                     ← Back to site
                   </Link>
                 </div>
@@ -233,5 +257,5 @@ export default function AdminDashboard() {
       </main>
       <Footer />
     </>
-  )
+  );
 }
