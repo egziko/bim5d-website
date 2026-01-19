@@ -1,10 +1,5 @@
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  i18n: {
-    locales: ['fr'],
-    defaultLocale: 'fr',
-  },
   headers: async () => {
     return [
       {
